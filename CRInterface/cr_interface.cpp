@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "CRInterface.h"
+#include "cr_interface.h"
 
 SegmentationArr::SegmentationArr() {
 }
