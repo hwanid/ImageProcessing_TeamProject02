@@ -104,6 +104,7 @@ int main(int argc, char** argv)
 	}
 
 	/********정현수 영역 start*******************/
+	//3rd version 조합이 가장 안정적
 	//텍스트 영역 구분 및 coord 출력
 	
 	partitioning(&makeBox(&image, &image_gray));
@@ -123,6 +124,8 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+//1st ver. partitioning
+/* Original Version
 void partitioning(Mat *image) {
 	Scalar_<uint8_t> bgrPixel;
 	uint8_t* pixelPtr = (uint8_t*)image->data;
@@ -140,12 +143,10 @@ void partitioning(Mat *image) {
 					start[1] = j; //첫 시작의 y좌표
 					startCount = false;
 
-					if(i + 1 < image->cols) i ++; // 10씩 뛰어넘어도 이미지 사이즈 over 안되면 점프
 				}
 				else { // 첫 시작이 아니라면 end 탐색
 					end[0] = i;
 					end[1] = j;
-					if (i + 1 < image->cols) i ++; // 10씩 뛰어넘어도 이미지 사이즈 over 안되면 점프
 				}
 				endCount = true;
 			}
@@ -168,9 +169,121 @@ void partitioning(Mat *image) {
 		}
 	}
 }
+*/
 
+//2nd ver. partitioning
+/*
+void partitioning(Mat *image) {
+	Scalar_<uint8_t> bgrPixel;
+	uint8_t* pixelPtr = (uint8_t*)image->data;
 
+	int start[2] = { 0 , 0 };
+	int end[2] = { 0, 0 };
+	bool startFlag = true;
+	bool endFlag = true;
 
+	for (int j = 10; j < image->rows; j = j+5) {
+		for (int i = 10; i < image->cols; i = i + 5) {
+			if (image->at<cv::Vec3b>(j, i)[0] == 0) 
+			{ // 검은색이면 
+				if (startFlag) // 시작점이라면
+				{
+					start[0] = i; // 시작점의 x 좌표
+					start[1] = j; // 시작점의 y 좌표
+					startFlag = false;
+					continue; // 이거 넣어야 하나 꼭?
+				}
+				else // 시작점이 아니라면
+				{
+					end[0] = i; // 끝점의 x 좌표
+					end[1] = j; // 끝점의 y 좌표
+					endFlag = true;
+				}
+			}
+			else //검은색이 아니라면
+			{ 
+				if (image->at<cv::Vec3b>(j+1, i)[0] == 0) // 지금은 검은색 아니지만, 직사각형의 우측 하단이 아니라면. 즉, 시작점의 아래 점이 검은색이라면.
+				{
+					break;
+				}
+				else // 진짜 우측 하단의 끝점이라면
+				{
+					if (endFlag == true) 
+					{
+						printf("start X = %d \t start Y = %d\n", start[0], start[1]);
+						printf("end X = %d \t end Y = %d\n", end[0], end[1]);
+						endFlag = false;
+					}
+					else 
+					{
+						break;
+					}
+					
+					startFlag = true;
+				}
+			}
+		}
+	}
+}
+*/
+
+//3rd ver. partitioning
+void partitioning(Mat *image) {
+	Scalar_<uint8_t> bgrPixel;
+	uint8_t* pixelPtr = (uint8_t*)image->data;
+
+	int start[2] = { 0 , 0 };
+	int end[2] = { 0, 0 };
+	bool startFlag = true;
+	bool endFlag = true;
+	int test = 0;
+
+	for (int j = 1; j < image->rows; j = j + 1) {
+		for (int i = 1; i < image->cols; i = i + 1) {
+			if (image->at<cv::Vec3b>(j, image->cols - 1)[0] == 0)
+			{ // 검은색이면 
+				
+				if (startFlag == true)
+				{
+					test = 1;
+					start[0] = i; // x좌표
+					start[1] = j;
+					end[0] = image->cols - 1;
+					end[1] = j;
+
+					startFlag = false;
+					endFlag = true;
+					break;
+				}
+				else 
+				{
+					test = 2;
+					end[1] = j;
+				}
+			}
+			else //검은색이 아니라면
+			{
+				if (endFlag == true)
+				{
+					test = 3;
+					printf("start X : %d \t start Y : %d\n", start[0], start[1]);
+					printf("end X : %d \t end Y : %d\n", end[0], end[1]);
+					endFlag = false;
+					startFlag = true;
+					break;
+				}
+				else
+				{
+					test = 4;
+					break;
+				}
+			}
+		}
+	}
+}
+
+//1st & 2nd ver. makeBox
+/*
 Mat makeBox(Mat *image, Mat *dest)
 {
 	int cn = image->channels();
@@ -181,8 +294,9 @@ Mat makeBox(Mat *image, Mat *dest)
 	image->copyTo(*dest);
 
 	float fGray = 0.0;
-	for (int j = 20; j < image->rows; j++) {
-		for (int i = 20; i < image->cols; i++) {
+	
+	for (int j = 40; j < image->rows; j++) {
+		for (int i = 40; i < image->cols; i++) {
 			bgrPixel.val[0] = pixelPtr[j * image->cols * cn + i * cn + 0]; // B
 			bgrPixel.val[1] = pixelPtr[j * image->cols * cn + i * cn + 1]; // G
 			bgrPixel.val[2] = pixelPtr[j * image->cols * cn + i * cn + 2]; // R
@@ -191,12 +305,54 @@ Mat makeBox(Mat *image, Mat *dest)
 			
 			if (fGray != 255) {
 				if (flag) {
-					for (int xi = 0; xi < 20; xi++) {
-						for (int yi = 0; yi < 20; yi++) {
+					for (int xi = 0; xi < 40; xi++) {
+						for (int yi = 0; yi < 40; yi++) {
 							dest->at<cv::Vec3b>(j - xi, i - yi)[0] = (int)0;
 							dest->at<cv::Vec3b>(j - xi, i - yi)[1] = (int)0;
 							dest->at<cv::Vec3b>(j - xi, i - yi)[2] = (int)0;
 						}
+					}
+					flag = false;
+				}
+			}
+			else { flag = true; }
+		}
+	}
+	
+	return *dest;
+}
+*/
+
+// 3rd ver. makeBox
+Mat makeBox(Mat *image, Mat *dest)
+{
+	int cn = image->channels();
+	bool flag = true;
+	Scalar_<uint8_t> bgrPixel;
+	uint8_t* pixelPtr = (uint8_t*)image->data;
+
+	image->copyTo(*dest);
+
+	float fGray = 0.0;
+	for (int j = 0; j < image->rows; j++)
+	{
+		for (int i = 0; i < image->cols; i++)
+		{
+			bgrPixel.val[0] = pixelPtr[j * image->cols * cn + i * cn + 0]; // B
+			bgrPixel.val[1] = pixelPtr[j * image->cols * cn + i * cn + 1]; // G
+			bgrPixel.val[2] = pixelPtr[j * image->cols * cn + i * cn + 2]; // R
+
+			fGray = 0.2126f * bgrPixel.val[2] + 0.7152f * bgrPixel.val[1] + 0.0722f * bgrPixel.val[0];
+
+			if (fGray != 255)
+			{
+				if (flag)
+				{
+					for (int xi = 0; xi < image->cols - i; xi++)
+					{
+						dest->at<cv::Vec3b>(j, i + xi)[0] = (int)0;
+						dest->at<cv::Vec3b>(j, i + xi)[1] = (int)0;
+						dest->at<cv::Vec3b>(j, i + xi)[2] = (int)0;
 					}
 					flag = false;
 				}
