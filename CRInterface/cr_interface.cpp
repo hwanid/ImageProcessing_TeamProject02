@@ -7,11 +7,12 @@ SegmentationArr::SegmentationArr() {
 }
 
 
-SegmentationArr::insert(String data, int height, int width) {
+void SegmentationArr::insert(string data, int height, int width) {
+
 
 }
 
-SegmentationArr::goNext() {
+void SegmentationArr::goNext() {
 
 	now++;
 

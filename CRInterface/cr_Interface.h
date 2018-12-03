@@ -12,6 +12,9 @@
 
 #include <vector>
 #include <list>
+#include <string>
+
+using std::string;
 
 typedef struct{
 
@@ -32,8 +35,9 @@ struct SegmentationArr {
 	int now = 0;
 
 	// insert data
-	void insert(String data, int height, int width);
+	void insert(string data, int height, int width);
 
+	
 	// next sentence
 	void goNext();
 
