@@ -96,16 +96,25 @@ int main(int argc, char** argv)
 	Mat image_gray;
 	int mask[3][3] = { {1,1,1}, {1,1,1}, {1,1,1} };
 
+	//이미지 존재 검사
 	image = imread(imageName, IMREAD_UNCHANGED);
 	if (image.empty()) {
 		cout << "Could not open or find the image" << endl;
 		return -1;
 	}
-	partitioning(&makeBox(&image, &image_gray));
 
+	/********정현수 영역 start*******************/
+	//텍스트 영역 구분 및 coord 출력
+	
+	partitioning(&makeBox(&image, &image_gray));
+	
+	/********정현수 영역 end*********************/
+
+	//기존 이미지 출력
 	namedWindow("Image Original", WINDOW_NORMAL | WINDOW_GUI_NORMAL);
 	imshow(imageName + " image Original", image);
 
+	//영역 칠한 이미지 출력
 	namedWindow("Image Original", WINDOW_NORMAL | WINDOW_GUI_NORMAL);
 	imshow(imageName + " image Original", image_gray);
 
@@ -155,24 +164,6 @@ void partitioning(Mat *image) {
 				else {
 					continue;
 				}
-
-				/*************************************************
-				//imagePartitioned라는 이름으로 그 조각난 이미지 보여주기
-				for (int j = start[1]; j < end[1]; j++) {
-					for (int i = start[0]; i < end[0]; i++) {
-						
-						
-						
-						imagePartitioned->at<cv::Vec3b>(j, i)[0] = image->at<cv::Vec3b>(j, i)[0];
-						imagePartitioned->at<cv::Vec3b>(j, i)[1] = image->at<cv::Vec3b>(j, i)[1];
-						imagePartitioned->at<cv::Vec3b>(j, i)[2] = image->at<cv::Vec3b>(j, i)[2];
-						
-					}
-				}
-
-				namedWindow("Image Original", WINDOW_NORMAL | WINDOW_GUI_NORMAL);
-				imshow("image Original", *imagePartitioned);
-				*/
 			}
 		}
 	}
