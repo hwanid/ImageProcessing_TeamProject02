@@ -2,59 +2,56 @@
 
 #include <string>
 
-// Layer1
-#define SIZE_LAYER1;
-#define ROW_LAYER1;
-#define COL_LAYER1;
-// Layer2
-#define SIZE_LAYER2;
-#define ROW_LAYER2;
-#define COL_LAYER2;
+// filter setting
+#define FILTER_ROW_SIZE 3
+#define FILTER_COL_SIZE 3
+#define FILTER_TOTAL_SIZE 9
+
+// number of filter setting
+#define LAYER1_FILTER 32
+#define LAYER2_FILTER 64
+
+// label
+#define ONEHOT_BIG 26
+#define ONEHOT_SMALL 26
+#define ONEHOT_NUM 10
+
+// input image
+#define IMAGE_ROW 28
+#define IMAGE_COL 28
+#define IMAGE_TOTAL_SIZE 784
+
+// L1 CONV size
+#define L1_CONV_ROW 26
+#define L1_CONV_COL 26
+#define L1_CONV_TOTAL 676
+
+// L1 POOL size
+#define L1_POOL_KSIZE 2
+#define L1_POOL_STRIDES 2
+#define L1_POOL_ROW 13
+#define L1_POOL_COL 13
+#define L1_POOL_TOTAL 169
+
+// L2 CONV size
+#define L2_CONV_ROW 11
+#define L2_CONV_COL 11
+#define L2_CONV_TOTAL 121
+
+// L2 POOL size
+#define L2_POOL_KSIZE 2
+#define L2_POOL_STRIDES 1
+#define L2_POOL_ROW 10
+#define L2_POOL_COL 10
+#define L2_POOL_TOTAL 100
 
 using std;
 using std::string;
 
-class Matrix {
-
-public:
-	int row;
-	int col;
-	float* mat;
-
-public:
-	Matrix();
-	Matrix(int row, int col);
-	Matrix(string data, int row, int col);
-	int EditMatrix(string data);
-};
-
 class Layer {
-public:
-	int size;
-	int matRow;
-	int matCol;
-	Matrix* layerData[];
 
 public:
-	Layer();
-	~Layer();
-	Layer(int size, int matRolw, int matCol);
-};
-
-class Weight {
-
-public:
-	int size;
-	int matRow;
-	int matCol;
-	Matrix* weightData[];
-
-public:
-	Weight();
-	~Weight();
-	Weight(int size, int matRow, int matCol);
-	int SetWeight
-	
+	float* imgs;
 
 };
 
@@ -66,26 +63,25 @@ public:
 
 };
 
-class Model {
+class ConvWeight {
 
 public:
-	int size;
-	Weight* weight[];
-	Bias* bias[];
-
-public:
-	Model();
-	Model(int size, Weight*, Bias*);
+	int filterrow, filtercol, in, out;
+	float* data;
 
 };
 
+class FlatWeight {
 
-int Matadd(Matrix* A, Matrix* B, Matrix* outMat);
-int Matadd(Matrix* A, float B, Matrix* outMat);
-int Matmul(Matrix* A, Matrix* B, Matrix* outMat);
-int Conv(Matrix* input, Matrix* kernel, Matrix* outMat);
-int ReLU(Matrix* input, Matrix* outMat);
-int LayerConv(Layer* input, Layer* output);
-int CharRecognition(Matrix* input, Matrix* output, Layer Layer1, Layer Layer2);
-char MatrixToChar(Matrix* input);
+public:
+	int size;
+	float* data;
+};
 
+int initialize_CapitalAlphabet(ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3);
+int initialize_SmallAlphabet(ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3);
+int initialize_Number(ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3);
+int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweight1, ConvWeight* cweight2, ConvWeight* fweight, Bias* bias3);
+int GetWeightFromCSV(int m, int n, ConvWeight* cweight, int filterrow, int filtercol, int in, int out);
+int GetWeightFromCSV(int m, FlatWeight* fweight, int matrow, int matcol, int out, int onehot);
+int GetBiasFromCSV(int chartype, Bias* bias, int onehot);
