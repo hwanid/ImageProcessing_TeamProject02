@@ -153,10 +153,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CharacterRecognition\character_recognition.h" />
     <ClInclude Include="CRInterface\cr_Interface.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CharacterRecognition\character_recognition.cpp" />
     <ClCompile Include="CRInterface\cr_interface.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

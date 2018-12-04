@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 // filter setting
 #define FILTER_ROW_SIZE 3
 #define FILTER_COL_SIZE 3
@@ -45,9 +43,6 @@
 #define L2_POOL_COL 10
 #define L2_POOL_TOTAL 100
 
-using std;
-using std::string;
-
 class Layer {
 
 public:
@@ -81,7 +76,7 @@ public:
 int initialize_CapitalAlphabet(ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3);
 int initialize_SmallAlphabet(ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3);
 int initialize_Number(ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3);
-int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweight1, ConvWeight* cweight2, ConvWeight* fweight, Bias* bias3);
+int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3);
 int GetWeightFromCSV(int m, int n, ConvWeight* cweight, int filterrow, int filtercol, int in, int out);
 int GetWeightFromCSV(int m, FlatWeight* fweight, int matrow, int matcol, int out, int onehot);
 int GetBiasFromCSV(int chartype, Bias* bias, int onehot);

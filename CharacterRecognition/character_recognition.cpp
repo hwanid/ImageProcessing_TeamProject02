@@ -1,46 +1,50 @@
 // 문자 인식용 함수 util
 
+#include <iostream>
 #include <string>
 #include <algorithm>
 #include <stdlib.h>
 #include "character_recognition.h"
 
-using std;
+using namespace std;
 using std::string;
 
 
 int initialize_CapitalAlphabet(ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3) {
 
-	GetWeightFromCSV(1, 1, &cweight1, FILTER_ROW_SIZE, FILTER_COL_SIZE, 1, LAYER1_FILTER);
-	GetWeightFromCSV(1, 2, &cweight2, FILTER_ROW_SIZE, FILTER_COL_SIZE, LAYER1_FILTER, LAYER2_FILTER);
+	GetWeightFromCSV(1, 1, cweight1, FILTER_ROW_SIZE, FILTER_COL_SIZE, 1, LAYER1_FILTER);
+	GetWeightFromCSV(1, 2, cweight2, FILTER_ROW_SIZE, FILTER_COL_SIZE, LAYER1_FILTER, LAYER2_FILTER);
 
-	GetWeightFromCSV(1, &fweight, L2_POOL_ROW, L2_POOL_COL, LAYER2_FILTER, ONEHOT_BIG);
-	GetBiasFromCSV(1, &bias3, L2_POOL_ROW, L2_POOL_COL, LAYER2_FILTER, ONEHOT_BIG);
+	GetWeightFromCSV(1, fweight, L2_POOL_ROW, L2_POOL_COL, LAYER2_FILTER, ONEHOT_BIG);
+	GetBiasFromCSV(1, bias3, ONEHOT_BIG);
 
+	return 0;
 }
 
 int initialize_SmallAlphabet(ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3) {
 
-	GetWeightFromCSV(2, 1, &cweight1, FILTER_ROW_SIZE, FILTER_COL_SIZE, 1, LAYER1_FILTER);
-	GetWeightFromCSV(2, 2, &cweight2, FILTER_ROW_SIZE, FILTER_COL_SIZE, LAYER1_FILTER, LAYER2_FILTER);
+	GetWeightFromCSV(2, 1, cweight1, FILTER_ROW_SIZE, FILTER_COL_SIZE, 1, LAYER1_FILTER);
+	GetWeightFromCSV(2, 2, cweight2, FILTER_ROW_SIZE, FILTER_COL_SIZE, LAYER1_FILTER, LAYER2_FILTER);
 
-	GetWeightFromCSV(2, &fweight, L2_POOL_ROW, L2_POOL_COL, LAYER2_FILTER, ONEHOT_BIG);
-	GetBiasFromCSV(2, &bias3, L2_POOL_ROW, L2_POOL_COL, LAYER2_FILTER, ONEHOT_BIG);
+	GetWeightFromCSV(2, fweight, L2_POOL_ROW, L2_POOL_COL, LAYER2_FILTER, ONEHOT_BIG);
+	GetBiasFromCSV(2, bias3, ONEHOT_BIG);
 
+	return 0;
 }
 
 int initialize_Number(ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3) {
 
-	GetWeightFromCSV(3, 1, &cweight1, FILTER_ROW_SIZE, FILTER_COL_SIZE, 1, LAYER1_FILTER);
-	GetWeightFromCSV(3, 2, &cweight2, FILTER_ROW_SIZE, FILTER_COL_SIZE, LAYER1_FILTER, LAYER2_FILTER);
+	GetWeightFromCSV(3, 1, cweight1, FILTER_ROW_SIZE, FILTER_COL_SIZE, 1, LAYER1_FILTER);
+	GetWeightFromCSV(3, 2, cweight2, FILTER_ROW_SIZE, FILTER_COL_SIZE, LAYER1_FILTER, LAYER2_FILTER);
 
-	GetWeightFromCSV(3, &fweight, L2_POOL_ROW, L2_POOL_COL, LAYER2_FILTER, ONEHOT_BIG);
-	GetBiasFromCSV(3, &bias3, L2_POOL_ROW, L2_POOL_COL, LAYER2_FILTER, ONEHOT_BIG);
+	GetWeightFromCSV(3, fweight, L2_POOL_ROW, L2_POOL_COL, LAYER2_FILTER, ONEHOT_BIG);
+	GetBiasFromCSV(3, bias3, ONEHOT_BIG);
 
+	return 0;
 }
 
 // send prob[26]
-int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweight1, ConvWeight* cweight2, ConvWeight* fweight, Bias* bias3) {
+int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweight1, ConvWeight* cweight2, FlatWeight* fweight, Bias* bias3) {
 
 	/*
 	// Weight data, bias Data 받기
@@ -58,12 +62,11 @@ int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweig
 	*/
 
 
-	Layer* L1;
-	Layer* L1_pooled;
+	Layer* L1 = new Layer;
+	Layer* L1_pooled = new Layer;
 
-	L1 = new Layer1;
-	L1->imgs = (float*)malloc(LAYER1_FILTER * L1_CONV_TOTAL * sizeof(float));
-	L1_pooled->imgs = (float*)malloc(LAYER1_FILTER * L1_POOL_TOTAL * sizeof(float));
+	L1->imgs = (float*)calloc(LAYER1_FILTER * L1_CONV_TOTAL, sizeof(float));
+	L1_pooled->imgs = (float*)calloc(LAYER1_FILTER * L1_POOL_TOTAL, sizeof(float));
 	
 	float from_input_tmp;
 	int output_tmp;
@@ -71,12 +74,9 @@ int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweig
 	// L1 시작
 
 	// Weight와 곱연산하기
-
-	float channel_sum;
+	
 	for (int channelRow = 0; channelRow < IMAGE_ROW - FILTER_ROW_SIZE + 1; channelRow++) {
 		for (int channelCol = 0; channelCol < IMAGE_COL - FILTER_COL_SIZE + 1; channelCol++) {
-			// 초기화
-			L1->imgs[L1_CONV_ROW * channelRow + channelCol] = 0;
 			for (int filterRow = 0; filterRow < FILTER_ROW_SIZE; filterRow++) {
 				for (int filterCol = 0; filterCol < FILTER_COL_SIZE; filterCol++) {
 					for (int channel = 0; channel < 1; channel++) {
@@ -92,13 +92,15 @@ int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweig
 		}
 	}
 
+
+
 	// Relu 연산하기
 	for (int channel = 0; channel < 1; channel++) {
 		for (int filter = 0; filter < LAYER1_FILTER; filter++) {
 			for (int channelRow = 0; channelRow < L1_CONV_ROW; channelRow++) {
 				for (int channelCol = 0; channelCol < L1_CONV_COL; channelCol++) {
 					// input = L1_CONV ... output = Relu(L1_CONV)
-					L1->imgs[L1_CONV_TOTAL * filter + L1_CONV_ROW * channelRow + channelCol] = max(0, L1->imgs[L1_CONV_TOTAL * filter + L1_CONV_ROW * channelRow + channelCol]);
+					L1->imgs[L1_CONV_TOTAL * filter + L1_CONV_ROW * channelRow + channelCol] = max(float(0), L1->imgs[L1_CONV_TOTAL * filter + L1_CONV_ROW * channelRow + channelCol]);
 
 				}
 			}
@@ -111,7 +113,7 @@ int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweig
 			for (int channelRow = 0; channelRow < L1_CONV_ROW - L1_POOL_KSIZE + L1_POOL_STRIDES; channelRow += L1_POOL_STRIDES) {
 				for (int channelCol = 0; channelCol < L1_CONV_COL - L1_POOL_KSIZE + L1_POOL_STRIDES; channelCol += L1_POOL_STRIDES) {
 					// input = L1_CONV ... output = L1_POOL
-					L1_pooled->imgs[L1_POOL_TOTAL * filter + L1_POOL_ROW * (channelRow / L1_POOL_STRIDES) + (channelCol/L1_POOL_STRIDES)] = 
+					L1_pooled->imgs[L1_POOL_TOTAL * filter + L1_POOL_ROW * (channelRow / L1_POOL_STRIDES) + (channelCol / L1_POOL_STRIDES)] =
 					max(
 						// 주의 완전하지 않은 MAXPOOL, KSIZE = 2 인 경우의 MAXPOOL
 						max(L1->imgs[L1_CONV_TOTAL * filter + L1_CONV_ROW * channelRow + channelCol], L1->imgs[L1_CONV_TOTAL * filter + L1_CONV_ROW * channelRow + (channelCol + 1)]),
@@ -122,20 +124,26 @@ int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweig
 		}
 	}
 
+	cout << "test 3" << endl;
+	for (int i = 0; i < LAYER1_FILTER * L1_POOL_TOTAL; i++) {
+		cout << L1_pooled->imgs[i] << "   ";
+	}
+	cout << endl;
+	cout << endl;
+	cout << endl;
+	cout << endl;
+
 	// L2 시작
 
 	Layer* L2 = new Layer;
 	Layer* L2_pooled = new Layer;
 
-	L2->imgs = (float*)malloc(LAYER1_FILTER * LAYER2_FILTER * L2_CONV_TOTAL * sizeof(float));
-	L2_pooled->imgs = (float*)malloc(LAYER2_FILTER * L2_POOL_TOTAL * sizeof(float));
+	L2->imgs = (float*)calloc(LAYER2_FILTER * L2_CONV_TOTAL, sizeof(float));
+	L2_pooled->imgs = (float*)calloc(LAYER2_FILTER * L2_POOL_TOTAL, sizeof(float));
 
 	// Weight와 곱연산하기
-	float channel_sum;
 	for (int channelRow = 0; channelRow < IMAGE_ROW - FILTER_ROW_SIZE + 1; channelRow++) {
 		for (int channelCol = 0; channelCol < IMAGE_COL - FILTER_COL_SIZE + 1; channelCol++) {
-			// 초기화
-			L2->imgs[L2_CONV_ROW * channelRow + channelCol] = 0;
 			for (int filterRow = 0; filterRow < FILTER_ROW_SIZE; filterRow++) {
 				for (int filterCol = 0; filterCol < FILTER_COL_SIZE; filterCol++) {
 					for (int channel = 0; channel < LAYER1_FILTER; channel++) {
@@ -154,18 +162,32 @@ int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweig
 	}
 
 
+	cout << "test 4" << endl;
+	for (int i = 0; i < 100; i++) {
+		cout << L2->imgs[i] << "   ";
+	}
+	cout << endl;
+
+
 	// Relu 연산하기
 	for (int channel = 0; channel < LAYER1_FILTER; channel++) {
 		for (int filter = 0; filter < LAYER2_FILTER; filter++) {
 			for (int channelRow = 0; channelRow < L2_CONV_ROW; channelRow++) {
 				for (int channelCol = 0; channelCol < L2_CONV_COL; channelCol++) {
 					// input = L2_CONV ... output = Relu(L2_CONV)
-					L2->imgs[L2_CONV_TOTAL * filter + L2_CONV_ROW * channelRow + channelCol] = max(0, L2->imgs[L2_CONV_TOTAL * filter + L2_CONV_ROW * channelRow + channelCol]);
+					L2->imgs[L2_CONV_TOTAL * filter + L2_CONV_ROW * channelRow + channelCol] = max((float)0, L2->imgs[L2_CONV_TOTAL * filter + L2_CONV_ROW * channelRow + channelCol]);
 
 				}
 			}
 		}
 	}
+
+	cout << endl;
+	cout << "test 5" << endl;
+	for (int i = 0; i < 1000; i++) {
+		cout << L2->imgs[i] << "   ";
+	}
+	cout << endl;
 
 	// Maxpool 하기
 	for (int channel = 0; channel < LAYER1_FILTER; channel++) {
@@ -184,6 +206,13 @@ int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweig
 		}
 	}
 
+
+	cout << "test 6" << endl;
+	for (int i = 0; i < 100; i++) {
+		cout << L2_pooled->imgs[i] << "   ";
+	}
+	cout << endl;
+
 	// 일렬 데이터로 펼치기
 	// L2_pooled = 10 * 10 * LAYER2_FILLTER, 완료
 
@@ -195,8 +224,10 @@ int CharRecognition_CapitalAlphabet(float* input, float* prob, ConvWeight* cweig
 		prob[hot] = 0;
 		tmp = 0;
 		for (int iter = 0; iter < L2_POOL_TOTAL * LAYER2_FILTER; iter++) {
-			tmp += (L2_pooled->imgs[iter] * fweight->data[iter] + bias3->data[iter]);
+			tmp += (L2_pooled->imgs[iter] * fweight->data[iter]);
 		}
+		tmp += bias3->data[hot];
+
 		prob[hot] = tmp;
 	}
 
@@ -253,15 +284,19 @@ int GetWeightFromCSV(int m, int n, ConvWeight* cweight, int filterrow, int filte
 
 	int size = filterrow * filtercol*in*out;
 	float data;
-	cweight->data = (float*)malloc(size * sizeof(float));
+	cweight->data = (float*)calloc(size, sizeof(float));
 
 
 	for (int a = 0; a < size; a++) {
 		fscanf(fp, "%f", &data);
-		cweight->data[i] = data;
+		
+		cweight->data[a] = data;
 	}
 
-	fp.close();
+	fclose(fp);
+
+	return 0;
+
 }
 
 int GetWeightFromCSV(int m, FlatWeight* fweight, int matrow, int matcol, int out, int onehot) {
@@ -282,12 +317,14 @@ int GetWeightFromCSV(int m, FlatWeight* fweight, int matrow, int matcol, int out
 
 	int size = matrow * matcol * out * onehot;
 	float data;
-	fweight->data = (float*)malloc(size * sizeof(float));
+	fweight->data = (float*)calloc(size, sizeof(float));
 
 	for (int a = 0; a < size; a++) {
 		fscanf(fp, "%f", &data);
-		fweight->data[i] = data;
+		fweight->data[a] = data;
 	}
+	
+	return 0;
 
 }
 
@@ -309,12 +346,14 @@ int GetBiasFromCSV(int chartype, Bias* bias, int onehot) {
 
 	int size = onehot;
 	float data;
-	bias->data = (float*)malloc(size * sizeof(float));
+	bias->data = (float*)calloc(size, sizeof(float));
 
 	for (int a = 0; a < size; a++) {
 		fscanf(fp, "%f", &data);
-		bias->data[i] = data;
+		bias->data[a] = data;
 	}
 
 	fclose(fp);
+
+	return 0;
 }
